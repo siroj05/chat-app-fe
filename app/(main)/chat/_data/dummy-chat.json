@@ -1,0 +1,104 @@
+{
+  "conversations": [
+    {
+      "id": "1",
+      "name": "Ucup",
+      "lastMessage": "Yaudah iya!",
+      "timeLabel": "kemaren"
+    },
+    {
+      "id": "2",
+      "name": "Budi",
+      "lastMessage": "Nanti gue kabarin ya",
+      "timeLabel": "10:32"
+    },
+    {
+      "id": "3",
+      "name": "Rina",
+      "lastMessage": "File-nya udah ku kirim ke drive",
+      "timeLabel": "Kemarin"
+    },
+    {
+      "id": "4",
+      "name": "Grup Project X",
+      "lastMessage": "Eko: deadline geser ke Jumat",
+      "timeLabel": "Senin"
+    }
+  ],
+  "messagesByConversationId": {
+    "1": [
+      {
+        "id": "m1",
+        "from": "them",
+        "body": "Naon sia anjing",
+        "time": "09:41"
+      },
+      {
+        "id": "m2",
+        "from": "me",
+        "body": "sia anjing",
+        "time": "09:42"
+      },
+      {
+        "id": "m3",
+        "from": "them",
+        "body": "Yaudah iya, besok kita lanjut lagi ya. Jangan lupa bawa draft revisinya.",
+        "time": "09:45"
+      },
+      {
+        "id": "m4",
+        "from": "me",
+        "body": "Siap, makasih.",
+        "time": "09:46"
+      }
+    ],
+    "2": [
+      {
+        "id": "m1",
+        "from": "them",
+        "body": "Lu free Sabtu engga?",
+        "time": "08:15"
+      },
+      {
+        "id": "m2",
+        "from": "me",
+        "body": "Kayaknya bisa sorean deh",
+        "time": "08:20"
+      },
+      {
+        "id": "m3",
+        "from": "them",
+        "body": "Nanti gue kabarin ya kalau jadi titik kumpulnya ke mana",
+        "time": "10:32"
+      }
+    ],
+    "3": [
+      {
+        "id": "m1",
+        "from": "me",
+        "body": "Rin, itu dokumen yang kemarin udah kebaca belum?",
+        "time": "14:02"
+      },
+      {
+        "id": "m2",
+        "from": "them",
+        "body": "Udah, File-nya udah ku kirim ke drive. Cek folder shared ya.",
+        "time": "14:18"
+      }
+    ],
+    "4": [
+      {
+        "id": "m1",
+        "from": "them",
+        "body": "Guys reminder stand up jam 10 ya",
+        "time": "09:00"
+      },
+      {
+        "id": "m2",
+        "from": "them",
+        "body": "Eko: deadline geser ke Jumat",
+        "time": "09:05"
+      }
+    ]
+  }
+}
