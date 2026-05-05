@@ -13,7 +13,7 @@ export default function ChatPage() {
     const {messagesByConversationId} = dummyChat;
     const [conversationId, setConversationId] = useState<{id : string, name : string} | null>(null);
     const messages = messagesByConversationId[conversationId?.id as keyof typeof messagesByConversationId];
-    console.log(messages)
+
   return (
     <div className="flex min-h-0 flex-1 w-full">
       <div className="flex w-1/3 min-h-0 min-w-0 flex-col bg-secondary">

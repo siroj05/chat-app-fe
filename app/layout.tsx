@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Roboto } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import TanstackProviders from "@/lib/tanstack-provider";
+import { Toaster } from "sonner";
 
 const roboto = Roboto({subsets:['latin'],variable:'--font-sans'});
 
@@ -27,7 +29,10 @@ export default function RootLayout({
       className={cn("h-full", "antialiased", fontSans.variable, "font-sans", roboto.variable)}
     >
       <body className="min-h-full flex flex-col">
-        {children}  
+        <TanstackProviders>
+          {children}
+          <Toaster/>  
+        </TanstackProviders>
       </body>
     </html>
   );

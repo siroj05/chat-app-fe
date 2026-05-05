@@ -1,13 +1,19 @@
 import type { NextConfig } from "next";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const API_ORIGIN = process.env.API_ORIGIN ?? "http://localhost:3001";
 
 const nextConfig: NextConfig = {
   output: "standalone",
   turbopack: {
     root: __dirname,
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${API_ORIGIN}/api/:path*`,
+      },
+    ];
   },
 };
 

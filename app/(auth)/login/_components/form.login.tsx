@@ -1,0 +1,89 @@
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { LoginReq, loginSchema } from "@/api/services/auth";
+
+interface FormLoginProps {
+  onsubmit : (data : LoginReq) => void;
+  isPending : boolean;
+  isSuccess : boolean;
+}
+
+export default function FormLogin(
+    {onsubmit, isPending} : FormLoginProps
+) {
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm<LoginReq>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+  });
+
+  return (
+    <Card className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle>Login to your account</CardTitle>
+        <CardDescription>
+          Enter your email below to login to your account
+        </CardDescription>
+        <CardAction>
+          <Button variant="link">
+            <Link href="/register">Sign Up</Link>
+          </Button>
+        </CardAction>
+      </CardHeader>
+      <form onSubmit={handleSubmit(onsubmit)} className="space-y-6">
+        <CardContent>
+          <div className="flex flex-col gap-6">
+            <div className="grid gap-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                {...register("username")}
+                id="username"
+                type="username"
+                placeholder="Username"
+                required
+              />
+              {errors.username && <p className="text-red-500">{errors.username.message}</p>}
+            </div>
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <Label htmlFor="password">Password</Label>
+                <a
+                  href="#"
+                  className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                >
+                  Forgot your password?
+                </a>
+              </div>
+              <Input id="password" type="password" {...register("password")} required />
+              {errors.password && <p className="text-red-500">{errors.password.message}</p>}
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="flex-col gap-2">
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? "Signing in..." : "Sign In"}
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
+  );
+}
