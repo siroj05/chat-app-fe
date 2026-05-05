@@ -11,18 +11,21 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useState } from "react";
 import { Spinner } from "./ui/spinner";
 import { MessageCircleIcon, PlusIcon } from "lucide-react";
+import { useTargetUser } from "@/api/services/conversations";
 
 export function SearchDialog({
   open,
   onOpenChange,
+  onTargetUser,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onTargetUser: (id: string) => void;
 }) {
   const [searchUserQuery, setSearchUserQuery] = useState("");
   const { debouncedValue, isDebouncing } = useDebounce(searchUserQuery, 500);
   const { data, isLoading, isError } = useSearchUsers(debouncedValue);
-  console.log("data = ", data);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent showCloseButton={false} className="sm:max-w-md">
@@ -40,7 +43,7 @@ export function SearchDialog({
             {
                 data?.users.map((user) => (
                     <div key={user.id} className="bg-secondary p-2 rounded-lg flex gap-5">
-                        <Button variant="outline" size="icon" className="bg-primary rounded-full text-primary-foreground hover:bg-primary/80">
+                        <Button onClick={() => onTargetUser(user.id)} variant="outline" size="icon" className="bg-primary rounded-full text-primary-foreground hover:bg-primary/80">
                             <MessageCircleIcon/>
                         </Button>
                         <p className="text-sm my-auto font-medium">{user.username}</p>
