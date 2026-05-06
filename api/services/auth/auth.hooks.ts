@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { loginApi, logoutApi, meApi } from "./auth.api";
+import { loginApi, logoutApi, meApi, registerApi } from "./auth.api";
 import { LoginRes } from "./auth.types";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -10,6 +10,19 @@ export const useLogin = () => {
         mutationFn: loginApi,
         onSuccess : (data : {user : LoginRes}) => {
             toast.success("Login berhasil, selamat datang " + data.user.username);
+            router.push("/chat");
+        },
+        onError : (error) => {
+            toast.error(error.message);
+        },
+    })
+}
+export const useRegister = () => {
+    const router = useRouter()
+    return useMutation({
+        mutationFn: registerApi,
+        onSuccess : (data : {user : LoginRes}) => {
+            toast.success("Register berhasil, selamat datang " + data.user.username);
             router.push("/chat");
         },
         onError : (error) => {

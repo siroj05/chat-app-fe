@@ -1,8 +1,8 @@
 import { api } from "@/api/base_url";
 import { LoginReq, LoginRes } from "./auth.types";
 
-export const registerApi =  async (req : LoginReq) : Promise<LoginRes> => {
-    const res = await api.post<LoginRes>("/api/auth/register", req);
+export const registerApi =  async (req : LoginReq) : Promise<{user : LoginRes}> => {
+    const res = await api.post<{user : LoginRes}>("/api/auth/register", req);
     return res.data;
 }
 
