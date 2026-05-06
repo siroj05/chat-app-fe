@@ -6,3 +6,8 @@ export type GetMessagesRes = {
         created_at : string;
     }[]
 }
+
+export type SendMessageBody = {
+    conversationId : string;
+    message : string;
+}

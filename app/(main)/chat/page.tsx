@@ -10,8 +10,10 @@ import Conversations from "./_components/conversation";
 import { SearchDialog } from "@/components/search-dialog";
 import { useGetConversation, useTargetUser } from "@/api/services/conversations";
 import { useSearchParams } from "next/navigation";
-import { useGetMessages } from "@/api/services/messages";
+import { SendMessageSchema, sendMessageSchema, useGetMessages, useSendMessage } from "@/api/services/messages";
 import { useMe } from "@/api/services/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 export default function ChatPage() {
   const [open, setOpen] = useState(false);
@@ -31,6 +33,25 @@ export default function ChatPage() {
   };
   const { data: me } = useMe();
   const { data: conversation } = useGetConversation(conversationId as string);
+  const { mutate: sendMessage, isPending: isPendingSendMessage } = useSendMessage();
+
+  const { register, handleSubmit, resetField } = useForm<SendMessageSchema>({
+    resolver: zodResolver(sendMessageSchema),
+    defaultValues: {
+      message: "",
+    },
+  });
+
+  const onSendMessage = (data : SendMessageSchema) => {
+    if(conversationId){
+      sendMessage({
+        conversationId: conversationId as string,
+        message: data.message,
+      })
+      resetField("message")
+    }
+  }
+
   return (
     <>
       <div className="flex min-h-0 flex-1 w-full">
@@ -57,9 +78,13 @@ export default function ChatPage() {
         </div>
         {/* conversations content */}
         <Conversations
+          onSendMessage={onSendMessage}
           messages={messages?.messages ?? []}
           me={me?.user ?? { id: "", username: "" }}
           sender={conversation ?? { conversationId: "", username: "" }}
+          register={register}
+          handleSubmit={handleSubmit}
+          isLoading={isPendingSendMessage}
         />
       </div>
       <SearchDialog
