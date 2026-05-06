@@ -1,11 +1,7 @@
 "use client";
-import { SearchIcon, SendIcon } from "lucide-react";
-import CardChat from "./_components/card-chat";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { SearchIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import dummyChat from "./_data/dummy-chat.json";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Conversations from "./_components/conversation";
 import { SearchDialog } from "@/components/search-dialog";
 import { useGetConversation, useTargetUser } from "@/api/services/conversations";
@@ -15,17 +11,13 @@ import { useMe } from "@/api/services/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-export default function ChatPage() {
+function ChatContent() {
   const [open, setOpen] = useState(false);
   const { mutate: targetUser } = useTargetUser();
   const searchParams = useSearchParams();
   const conversationId = searchParams.get("q");
 
-  const {
-    data: messages,
-    isPending: isPendingMessages,
-    isLoading: isLoadingMessages,
-  } = useGetMessages(conversationId as string);
+  const { data: messages } = useGetMessages(conversationId as string);
 
   const onTargetUser = (id: string) => {
     targetUser(id);
@@ -42,15 +34,15 @@ export default function ChatPage() {
     },
   });
 
-  const onSendMessage = (data : SendMessageSchema) => {
-    if(conversationId){
+  const onSendMessage = (data: SendMessageSchema) => {
+    if (conversationId) {
       sendMessage({
         conversationId: conversationId as string,
         message: data.message,
-      })
-      resetField("message")
+      });
+      resetField("message");
     }
-  }
+  };
 
   return (
     <>
@@ -93,5 +85,13 @@ export default function ChatPage() {
         onTargetUser={onTargetUser}
       />
     </>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense>
+      <ChatContent />
+    </Suspense>
   );
 }
