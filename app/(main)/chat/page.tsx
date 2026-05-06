@@ -18,6 +18,7 @@ import Sidebar from "@/components/sidebar";
 import { Button } from "@/components/ui/button";
 import { SearchIcon } from "lucide-react";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 function ChatContent() {
   const [open, setOpen] = useState(false);
@@ -79,15 +80,15 @@ function ChatContent() {
       }
     }
   };
-
+  const isMobile = useIsMobile()
   return (
     <>
       <div className="flex min-h-0 flex-1 w-full">
         <Sidebar setOpen={setOpen} openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
         {/* conversations content */}
-        <Button onClick={() => setOpenSidebar(true)} variant="outline" size="icon" className="absolute top-1/6 left-4 rounded-full">
+        {isMobile && <Button onClick={() => setOpenSidebar(true)} variant="outline" size="icon" className="absolute top-1/6 left-4 rounded-full">
           <SearchIcon className="w-4 h-4"/>
-        </Button>
+        </Button>}
         <Conversations
           onSendMessage={onSendMessage}
           messages={mergedMessages}
