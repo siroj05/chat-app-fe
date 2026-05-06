@@ -4,13 +4,20 @@ import Conversations from "./_components/conversation";
 import { SearchDialog } from "@/components/search-dialog";
 import { useGetConversation, useTargetUser } from "@/api/services/conversations";
 import { useSearchParams } from "next/navigation";
-import { SendMessageSchema, sendMessageSchema, useGetMessages, useSendMessage } from "@/api/services/messages";
+import {
+  SendMessageSchema,
+  sendMessageSchema,
+  useChatWebSocket,
+  useGetMessages,
+  useSendMessage,
+} from "@/api/services/messages";
 import { useMe } from "@/api/services/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import Sidebar from "@/components/sidebar";
 import { Button } from "@/components/ui/button";
 import { SearchIcon } from "lucide-react";
+import { toast } from "sonner";
 
 function ChatContent() {
   const [open, setOpen] = useState(false);
@@ -27,6 +34,22 @@ function ChatContent() {
   const { data: me } = useMe();
   const { data: conversation } = useGetConversation(conversationId as string);
   const { mutate: sendMessage, isPending: isPendingSendMessage } = useSendMessage();
+  const { realtimeMessages, sendViaWs, isConnected } = useChatWebSocket(
+    conversationId ?? undefined
+  );
+
+  const mergedMessages = (() => {
+    const base = messages?.messages ?? [];
+    if (realtimeMessages.length === 0) return base;
+    const map = new Map(base.map((m) => [m.id, m]));
+    for (const item of realtimeMessages) {
+      map.set(item.id, item);
+    }
+    return Array.from(map.values()).sort(
+      (a, b) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+  })();
 
   const { register, handleSubmit, resetField } = useForm<SendMessageSchema>({
     resolver: zodResolver(sendMessageSchema),
@@ -37,11 +60,23 @@ function ChatContent() {
 
   const onSendMessage = (data: SendMessageSchema) => {
     if (conversationId) {
-      sendMessage({
+      const sentViaWs = sendViaWs({
         conversationId: conversationId as string,
         message: data.message,
       });
+
+      if (!sentViaWs) {
+        // Fallback to existing HTTP flow when websocket is not ready.
+        sendMessage({
+          conversationId: conversationId as string,
+          message: data.message,
+        });
+      }
+
       resetField("message");
+      if (!isConnected) {
+        toast.message("WebSocket belum terhubung, kirim via HTTP fallback");
+      }
     }
   };
 
@@ -55,7 +90,7 @@ function ChatContent() {
         </Button>
         <Conversations
           onSendMessage={onSendMessage}
-          messages={messages?.messages ?? []}
+          messages={mergedMessages}
           me={me?.user ?? { id: "", username: "" }}
           sender={conversation ?? { conversationId: "", username: "" }}
           register={register}
