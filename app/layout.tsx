@@ -16,6 +16,11 @@ const fontSans = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "jujurly",
   description: "jujurly is a chat application that allows you to chat with your friends and family",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon-16x16.png",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({
