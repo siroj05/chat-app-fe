@@ -1,6 +1,4 @@
 "use client";
-import { SearchIcon } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { useState, Suspense } from "react";
 import Conversations from "./_components/conversation";
 import { SearchDialog } from "@/components/search-dialog";
@@ -10,13 +8,16 @@ import { SendMessageSchema, sendMessageSchema, useGetMessages, useSendMessage } 
 import { useMe } from "@/api/services/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import Sidebar from "@/components/sidebar";
+import { Button } from "@/components/ui/button";
+import { SearchIcon } from "lucide-react";
 
 function ChatContent() {
   const [open, setOpen] = useState(false);
   const { mutate: targetUser } = useTargetUser();
   const searchParams = useSearchParams();
   const conversationId = searchParams.get("q");
-
+  const [openSidebar, setOpenSidebar] = useState(false);
   const { data: messages } = useGetMessages(conversationId as string);
 
   const onTargetUser = (id: string) => {
@@ -47,28 +48,11 @@ function ChatContent() {
   return (
     <>
       <div className="flex min-h-0 flex-1 w-full">
-        <div className="flex w-1/3 min-h-0 min-w-0 flex-col bg-secondary">
-          <div className="bg-primary/10 w-full flex gap-2 p-2">
-            <SearchIcon className="my-auto" />
-            <Input
-              role="button"
-              readOnly
-              onClick={() => setOpen(true)}
-              className="bg-secondary rounded-full cursor-pointer"
-              placeholder="Cari..."
-            />
-          </div>
-          <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-2">
-            {/* ini card  */}
-            {/* {conversations.map(
-              (conversation, index) => (
-                <CardChat key={index} conversation={conversation} selectConversation={(conversation) => setConversationId({id : conversation.id, name : conversation.name})}/>
-              ),
-            )} */}
-            {/* ini card  */}
-          </div>
-        </div>
+        <Sidebar setOpen={setOpen} openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
         {/* conversations content */}
+        <Button onClick={() => setOpenSidebar(true)} variant="outline" size="icon" className="absolute top-1/6 left-4 rounded-full">
+          <SearchIcon className="w-4 h-4"/>
+        </Button>
         <Conversations
           onSendMessage={onSendMessage}
           messages={messages?.messages ?? []}

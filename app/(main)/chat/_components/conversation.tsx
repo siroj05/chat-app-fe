@@ -58,7 +58,7 @@ export default function Conversations({
               {m.sender_id === me.id && (
                 <>
                   <div className="w-full flex justify-end">
-                    <div className="w-fit max-w-[min(100%,28rem)] wrap-break-word rounded-lg border bg-primary p-2">
+                    <div className="w-fit max-w-[min(100%,28rem)] wrap-break-word rounded-lg border bg-primary/80 p-2">
                       {m.message}
                     </div>
                   </div>
