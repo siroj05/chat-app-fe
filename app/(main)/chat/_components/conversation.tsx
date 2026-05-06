@@ -1,14 +1,12 @@
-import { useMe } from "@/api/services/auth";
 import { GetConversationRes } from "@/api/services/conversations/conversations.types";
-import { SendMessageSchema, sendMessageSchema } from "@/api/services/messages";
+import { SendMessageSchema } from "@/api/services/messages";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { SendIcon } from "lucide-react";
-import React from "react";
-import { UseFormHandleSubmit, UseFormRegister, useForm } from "react-hook-form";
-
+import React, { useRef } from "react";
+import { UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
+import { useEffect } from "react";
 interface ConversationsProps {
   messages: {
     id: string;
@@ -36,6 +34,12 @@ export default function Conversations({
   handleSubmit,
   isLoading,
 }: ConversationsProps) {
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   return (
     <div className="min-h-0 min-w-0 flex-1 flex flex-col justify-between">
       <div className="flex min-h-0 flex-1 flex-col">
@@ -76,6 +80,7 @@ export default function Conversations({
           )}
         </div>
       </div>
+      <div ref={bottomRef} />
       <form
         onSubmit={handleSubmit(onSendMessage)}
         className="flex gap-2 mb-5 px-2"
