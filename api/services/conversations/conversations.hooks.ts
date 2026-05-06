@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { getConversationApi, targetUserApi } from "./conversations.api"
+import { getConversationApi, getConversationsListApi, targetUserApi } from "./conversations.api"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
@@ -26,4 +26,11 @@ export const useGetConversation = (id : string) => {
         queryFn: () => getConversationApi(id),
         enabled: !!id,
     })
+}
+
+export const useGetConversationsList = () => {
+    return useQuery({
+        queryKey: ["conversations"],
+        queryFn: getConversationsListApi,
+    });
 }
