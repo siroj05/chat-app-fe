@@ -35,17 +35,30 @@ export default function Conversations({
   isLoading,
 }: ConversationsProps) {
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const didInitialScrollRef = useRef(false);
+
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    bottomRef.current?.scrollIntoView({ behavior, block: "end" });
+  };
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Saat pertama kali buka chat dengan riwayat pesan panjang, langsung lompat ke bawah.
+    if (!didInitialScrollRef.current) {
+      scrollToBottom("auto");
+      didInitialScrollRef.current = true;
+      return;
+    }
+
+    // Saat ada pesan baru, scroll halus ke bawah.
+    scrollToBottom("smooth");
   }, [messages]);
 
   return (
     <div className="min-h-0 min-w-0 flex-1 flex flex-col justify-between">
       <div className="flex min-h-0 flex-1 flex-col">
-        <div className="shrink-0 bg-secondary p-4 font-semibold border">
+        {sender.username && <div className="shrink-0 bg-secondary p-4 font-semibold border">
           {sender.username}
-        </div>
+        </div>}
         <div className="min-h-0 flex-1 overflow-y-auto p-4 text-white space-y-2">
           {messages?.map((m) => (
             <React.Fragment key={m.id}>
@@ -78,12 +91,13 @@ export default function Conversations({
               </div>
             </div>
           )}
+          <div ref={bottomRef} />
         </div>
       </div>
-      <div ref={bottomRef} />
+      
       <form
         onSubmit={handleSubmit(onSendMessage)}
-        className="flex gap-2 mb-5 px-2"
+        className="flex gap-2 p-2 bg-secondary"
       >
         <Textarea
           {...register("message")}
