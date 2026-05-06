@@ -58,28 +58,39 @@ function ChatContent() {
     },
   });
 
+  // const onSendMessage = (data: SendMessageSchema) => {
+  //   if (conversationId) {
+  //     const sentViaWs = sendViaWs({
+  //       conversationId: conversationId as string,
+  //       message: data.message,
+  //     });
+
+  //     if (!sentViaWs) {
+  //       // Fallback to existing HTTP flow when websocket is not ready.
+  //       sendMessage({
+  //         conversationId: conversationId as string,
+  //         message: data.message,
+  //       });
+  //     }
+
+  //     resetField("message");
+  //     if (!isConnected) {
+  //       toast.message("WebSocket belum terhubung, kirim via HTTP fallback");
+  //     }
+  //   }
+  // };
+
   const onSendMessage = (data: SendMessageSchema) => {
     if (conversationId) {
-      const sentViaWs = sendViaWs({
-        conversationId: conversationId as string,
+      sendViaWs({
+        conversationId,
         message: data.message,
       });
-
-      if (!sentViaWs) {
-        // Fallback to existing HTTP flow when websocket is not ready.
-        sendMessage({
-          conversationId: conversationId as string,
-          message: data.message,
-        });
-      }
-
+  
       resetField("message");
-      if (!isConnected) {
-        toast.message("WebSocket belum terhubung, kirim via HTTP fallback");
-      }
     }
   };
-
+  
   return (
     <>
       <div className="flex min-h-0 flex-1 w-full">

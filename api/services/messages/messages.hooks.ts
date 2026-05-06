@@ -4,27 +4,27 @@ import { getMessagesApi, sendMessageApi } from "./messages.api";
 import { toast } from "sonner";
 import { SendMessageBody } from "./messages.types";
 
-export const useGetMessages = (id : string) => {
-    return useQuery({
-        queryKey: ["messages", id],
-        queryFn: () => getMessagesApi(id),
-        enabled: !!id,
-    })
-}
+export const useGetMessages = (id: string) => {
+  return useQuery({
+    queryKey: ["messages", id],
+    queryFn: () => getMessagesApi(id),
+    enabled: !!id,
+  });
+};
 
 export const useSendMessage = () => {
-    const queryClient = useQueryClient()
-    return useMutation({
-        mutationFn: sendMessageApi,
-        onSuccess: () => {
-            toast.success("Message sent successfully")
-            queryClient.invalidateQueries({ queryKey: ["messages"] })
-        },
-        onError: (error) => {
-            toast.error(error.message)
-        }
-    })
-}
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: sendMessageApi,
+    onSuccess: () => {
+      toast.success("Message sent successfully");
+    //   queryClient.invalidateQueries({ queryKey: ["messages"] });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+};
 
 type RealtimeMessage = {
   id: string;
@@ -57,50 +57,34 @@ export const useChatWebSocket = (conversationId?: string) => {
   >({});
 
   useEffect(() => {
-    if (typeof window === "undefined" || !conversationId) return;
+    if (!conversationId) return;
 
     const socket = new WebSocket(getWsUrl());
     socketRef.current = socket;
 
     socket.onopen = () => {
-      setReadyState(WebSocket.OPEN);
       socket.send(
         JSON.stringify({
           type: "join",
           conversationId,
-        })
+        }),
       );
     };
 
-    socket.onclose = () => {
-      setReadyState(WebSocket.CLOSED);
-    };
-
-    socket.onerror = () => {
-      setReadyState(WebSocket.CLOSED);
-    };
-
     socket.onmessage = (event) => {
-      let parsed: WsServerEvent;
-      try {
-        parsed = JSON.parse(event.data) as WsServerEvent;
-      } catch {
-        return;
-      }
-      if (parsed.type === "error") {
-        toast.error(parsed.message);
-        return;
-      }
+      const data = JSON.parse(event.data);
 
-      if (parsed.type === "new_message") {
-        const payload = parsed.payload;
+      if (data.type === "new_message") {
         setMessagesByConversation((prev) => {
           const existing = prev[conversationId] ?? [];
-          // Dedupe by id in case same message is received multiple times.
-          if (existing.some((m) => m.id === payload.id)) return prev;
+
+          if (existing.find((m) => m.id === data.payload.id)) {
+            return prev;
+          }
+
           return {
             ...prev,
-            [conversationId]: [...existing, payload],
+            [conversationId]: [...existing, data.payload],
           };
         });
       }
@@ -108,8 +92,6 @@ export const useChatWebSocket = (conversationId?: string) => {
 
     return () => {
       socket.close();
-      socketRef.current = null;
-      setReadyState(WebSocket.CLOSED);
     };
   }, [conversationId]);
 
@@ -121,7 +103,7 @@ export const useChatWebSocket = (conversationId?: string) => {
         type: "send_message",
         conversationId: body.conversationId,
         message: body.message,
-      })
+      }),
     );
     return true;
   };
