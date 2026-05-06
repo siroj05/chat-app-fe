@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { getMessagesApi, sendMessageApi } from "./messages.api";
 import { toast } from "sonner";
 import { SendMessageBody } from "./messages.types";
@@ -13,7 +13,6 @@ export const useGetMessages = (id: string) => {
 };
 
 export const useSendMessage = () => {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: sendMessageApi,
     onSuccess: () => {
@@ -37,20 +36,36 @@ type WsServerEvent =
   | {
       type: "new_message";
       payload: RealtimeMessage;
+      message: string;
     }
   | {
       type: "error";
       message: string;
+      payload: RealtimeMessage;
     };
 
 function getWsUrl() {
   if (typeof window === "undefined") return "";
+  // Allow explicit override per environment (recommended for production).
+  const fromEnv = process.env.NEXT_PUBLIC_WS_URL;
+  if (fromEnv && fromEnv.length > 0) return fromEnv;
+
+  // Local dev: FE usually runs on :3000 and BE on :3001.
+  if (
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1"
+  ) {
+    return `ws://${window.location.hostname}:3001/ws`;
+  }
+
+  // Default same-origin deployment.
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   return `${protocol}//${window.location.host}/ws`;
 }
 
 export const useChatWebSocket = (conversationId?: string) => {
   const socketRef = useRef<WebSocket | null>(null);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [readyState, setReadyState] = useState<number>(WebSocket.CLOSED);
   const [messagesByConversation, setMessagesByConversation] = useState<
     Record<string, RealtimeMessage[]>
@@ -59,39 +74,77 @@ export const useChatWebSocket = (conversationId?: string) => {
   useEffect(() => {
     if (!conversationId) return;
 
-    const socket = new WebSocket(getWsUrl());
-    socketRef.current = socket;
+    let isUnmounted = false;
 
-    socket.onopen = () => {
-      socket.send(
-        JSON.stringify({
-          type: "join",
-          conversationId,
-        }),
-      );
+    const connect = () => {
+      const socket = new WebSocket(getWsUrl());
+      socketRef.current = socket;
+      setReadyState(WebSocket.CONNECTING);
+
+      socket.onopen = () => {
+        setReadyState(WebSocket.OPEN);
+        socket.send(
+          JSON.stringify({
+            type: "join",
+            conversationId,
+          }),
+        );
+      };
+
+      socket.onmessage = (event) => {
+        let data: WsServerEvent;
+        try {
+          data = JSON.parse(event.data) as WsServerEvent;
+        } catch {
+          return;
+        }
+
+        if (data.type === "error") {
+          toast.error(data.message);
+          return;
+        }
+
+        if (data.type === "new_message") {
+          setMessagesByConversation((prev) => {
+            const existing = prev[conversationId] ?? [];
+
+            if (existing.find((m) => m.id === data.payload.id)) {
+              return prev;
+            }
+
+            return {
+              ...prev,
+              [conversationId]: [...existing, data.payload],
+            };
+          });
+        }
+      };
+
+      socket.onerror = () => {
+        setReadyState(WebSocket.CLOSED);
+      };
+
+      socket.onclose = () => {
+        setReadyState(WebSocket.CLOSED);
+        socketRef.current = null;
+        // Best-effort reconnect while current conversation is still active.
+        if (!isUnmounted) {
+          reconnectTimerRef.current = setTimeout(connect, 1200);
+        }
+      };
     };
 
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-
-      if (data.type === "new_message") {
-        setMessagesByConversation((prev) => {
-          const existing = prev[conversationId] ?? [];
-
-          if (existing.find((m) => m.id === data.payload.id)) {
-            return prev;
-          }
-
-          return {
-            ...prev,
-            [conversationId]: [...existing, data.payload],
-          };
-        });
-      }
-    };
+    connect();
 
     return () => {
-      socket.close();
+      isUnmounted = true;
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
+      socketRef.current?.close();
+      socketRef.current = null;
+      setReadyState(WebSocket.CLOSED);
     };
   }, [conversationId]);
 
