@@ -7,6 +7,7 @@ import { Sheet, SheetContent } from "./ui/sheet";
 import { useGetConversationsList } from "@/api/services/conversations";
 import { ConversationListItem } from "@/api/services/conversations/conversations.types";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 function getWsUrl() {
   const fromEnv = process.env.NEXT_PUBLIC_WS_URL;
@@ -30,6 +31,7 @@ export default function Sidebar({
   openSidebar: boolean;
   setOpenSidebar: (open: boolean) => void;
 }) {
+  const queryClient = useQueryClient();
   const isMobile = useIsMobile();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -40,6 +42,7 @@ export default function Sidebar({
   >({});
   const socketRef = useRef<WebSocket | null>(null);
   const conversationsRef = useRef<ConversationListItem[]>([]);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const conversations = useMemo(() => {
     const base = data?.conversations ?? [];
     const patched = base.map((c) => {
@@ -63,56 +66,83 @@ export default function Sidebar({
   }, [conversations]);
 
   useEffect(() => {
-    const ws = new WebSocket(getWsUrl());
-    socketRef.current = ws;
+    let isUnmounted = false;
 
-    ws.onopen = () => {
-      // Join all conversations so sidebar receives realtime updates.
-      conversationsRef.current.forEach((c) => {
-        ws.send(
-          JSON.stringify({
-            type: "join",
-            conversationId: c.conversation_id,
-          })
-        );
-      });
-    };
+    const connect = () => {
+      const ws = new WebSocket(getWsUrl());
+      socketRef.current = ws;
 
-    ws.onmessage = (event) => {
-      let parsed: {
-        type: string;
-        payload?: {
-          conversation_id: string;
-          message: string;
-          created_at: string;
-        };
+      ws.onopen = () => {
+        // Join all conversations so sidebar receives realtime updates.
+        conversationsRef.current.forEach((c) => {
+          ws.send(
+            JSON.stringify({
+              type: "join",
+              conversationId: c.conversation_id,
+            })
+          );
+        });
       };
-      try {
-        parsed = JSON.parse(event.data);
-      } catch {
-        return;
-      }
 
-      if (parsed.type !== "new_message" || !parsed.payload) return;
-      const payload = parsed.payload;
+      ws.onmessage = (event) => {
+        let parsed: {
+          type: string;
+          payload?: {
+            conversation_id: string;
+            message: string;
+            created_at: string;
+          };
+        };
+        try {
+          parsed = JSON.parse(event.data);
+        } catch {
+          return;
+        }
 
-      setLivePatch((prev) => {
-        const next = {
+        if (parsed.type !== "new_message" || !parsed.payload) return;
+        const payload = parsed.payload;
+
+        // Fast local patch for instant UI update.
+        setLivePatch((prev) => ({
           ...prev,
           [payload.conversation_id]: {
             last_message: payload.message,
             last_message_at: payload.created_at,
           },
-        };
-        return next;
-      });
+        }));
+
+        const exists = conversationsRef.current.some(
+          (c) => c.conversation_id === payload.conversation_id
+        );
+        if (!exists) {
+          queryClient.invalidateQueries({ queryKey: ["conversations"] });
+        }
+      };
+
+      ws.onclose = () => {
+        socketRef.current = null;
+        if (!isUnmounted) {
+          reconnectTimerRef.current = setTimeout(connect, 1200);
+        }
+      };
+
+      ws.onerror = () => {
+        ws.close();
+      };
     };
 
+    connect();
+
     return () => {
-      ws.close();
+      isUnmounted = true;
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
+      socketRef.current?.close();
       socketRef.current = null;
     };
-  }, []);
+  }, [queryClient]);
 
   useEffect(() => {
     const socket = socketRef.current;
