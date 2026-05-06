@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getMessagesApi, sendMessageApi } from "./messages.api";
 import { toast } from "sonner";
 import { SendMessageBody } from "./messages.types";
@@ -13,11 +13,14 @@ export const useGetMessages = (id: string) => {
 };
 
 export const useSendMessage = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: sendMessageApi,
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       toast.success("Message sent successfully");
-    //   queryClient.invalidateQueries({ queryKey: ["messages"] });
+      queryClient.invalidateQueries({
+        queryKey: ["messages", variables.conversationId],
+      });
     },
     onError: (error) => {
       toast.error(error.message);
@@ -66,13 +69,27 @@ function getWsUrl() {
 export const useChatWebSocket = (conversationId?: string) => {
   const socketRef = useRef<WebSocket | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const activeConversationIdRef = useRef<string | undefined>(conversationId);
   const [readyState, setReadyState] = useState<number>(WebSocket.CLOSED);
   const [messagesByConversation, setMessagesByConversation] = useState<
     Record<string, RealtimeMessage[]>
   >({});
 
   useEffect(() => {
-    if (!conversationId) return;
+    activeConversationIdRef.current = conversationId;
+    const socket = socketRef.current;
+    if (!conversationId || !socket || socket.readyState !== WebSocket.OPEN) return;
+
+    socket.send(
+      JSON.stringify({
+        type: "join",
+        conversationId,
+      }),
+    );
+  }, [conversationId]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
     let isUnmounted = false;
 
@@ -83,12 +100,15 @@ export const useChatWebSocket = (conversationId?: string) => {
 
       socket.onopen = () => {
         setReadyState(WebSocket.OPEN);
-        socket.send(
-          JSON.stringify({
-            type: "join",
-            conversationId,
-          }),
-        );
+        const activeConversationId = activeConversationIdRef.current;
+        if (activeConversationId) {
+          socket.send(
+            JSON.stringify({
+              type: "join",
+              conversationId: activeConversationId,
+            }),
+          );
+        }
       };
 
       socket.onmessage = (event) => {
@@ -105,8 +125,10 @@ export const useChatWebSocket = (conversationId?: string) => {
         }
 
         if (data.type === "new_message") {
+          const activeConversationId = activeConversationIdRef.current;
+          if (!activeConversationId) return;
           setMessagesByConversation((prev) => {
-            const existing = prev[conversationId] ?? [];
+            const existing = prev[activeConversationId] ?? [];
 
             if (existing.find((m) => m.id === data.payload.id)) {
               return prev;
@@ -114,7 +136,7 @@ export const useChatWebSocket = (conversationId?: string) => {
 
             return {
               ...prev,
-              [conversationId]: [...existing, data.payload],
+              [activeConversationId]: [...existing, data.payload],
             };
           });
         }
@@ -146,7 +168,7 @@ export const useChatWebSocket = (conversationId?: string) => {
       socketRef.current = null;
       setReadyState(WebSocket.CLOSED);
     };
-  }, [conversationId]);
+  }, []);
 
   const sendViaWs = (body: SendMessageBody) => {
     const socket = socketRef.current;
