@@ -4,10 +4,11 @@ import { useMe } from "@/api/services/auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+/** Bentuk sama dengan response `GET /api/auth/me` dan login (`{ user: … }`). */
 export function hasSessionPayload(data: unknown): boolean {
     if (!data || typeof data !== "object") return false;
-    const o = data as { success?: boolean; data?: { user?: { id?: string } } };
-    return o.success === true && Boolean(o.data?.user?.id);
+    const o = data as { user?: { id?: string } };
+    return Boolean(o.user?.id);
 }
 
 
