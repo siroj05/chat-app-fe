@@ -64,6 +64,21 @@ export default function Sidebar({
     conversationsRef.current = conversations;
   }, [conversations]);
 
+  // Stable ref to a joinAll function so onopen always reads the latest conversations.
+  const joinAllRef = useRef<(() => void) | null>(null);
+  joinAllRef.current = () => {
+    const ws = socketRef.current;
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    conversationsRef.current.forEach((c) => {
+      ws.send(
+        JSON.stringify({
+          type: "join",
+          conversationId: c.conversation_id,
+        })
+      );
+    });
+  };
+
   useEffect(() => {
     let isUnmounted = false;
 
@@ -72,15 +87,10 @@ export default function Sidebar({
       socketRef.current = ws;
 
       ws.onopen = () => {
-        // Join all conversations so sidebar receives realtime updates.
-        conversationsRef.current.forEach((c) => {
-          ws.send(
-            JSON.stringify({
-              type: "join",
-              conversationId: c.conversation_id,
-            })
-          );
-        });
+        // Join all currently-known conversations.
+        // joinAllRef always reads the latest conversationsRef, avoiding race conditions
+        // where data arrives after the socket was already open.
+        joinAllRef.current?.();
       };
 
       ws.onmessage = (event) => {
@@ -110,12 +120,9 @@ export default function Sidebar({
           },
         }));
 
-        const exists = conversationsRef.current.some(
-          (c) => c.conversation_id === payload.conversation_id
-        );
-        if (!exists) {
-          queryClient.invalidateQueries({ queryKey: ["conversations"] });
-        }
+        // Always invalidate so the server is the source of truth for ordering/unread.
+        // This is cheap because React Query deduplicates in-flight requests.
+        queryClient.invalidateQueries({ queryKey: ["conversations"] });
       };
 
       ws.onclose = () => {
@@ -143,17 +150,10 @@ export default function Sidebar({
     };
   }, [queryClient]);
 
+  // When new conversations arrive (e.g. data loaded after WS already open),
+  // join them so the sidebar receives broadcasts for those rooms too.
   useEffect(() => {
-    const socket = socketRef.current;
-    if (!socket || socket.readyState !== WebSocket.OPEN) return;
-    conversations.forEach((c) => {
-      socket.send(
-        JSON.stringify({
-          type: "join",
-          conversationId: c.conversation_id,
-        })
-      );
-    });
+    joinAllRef.current?.();
   }, [conversations]);
 
   const selectConversation = (conversationId: string) => {
