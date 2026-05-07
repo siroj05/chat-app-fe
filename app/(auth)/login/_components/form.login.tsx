@@ -36,7 +36,6 @@ export default function FormLogin(
     defaultValues: {
       username: "",
       password: "",
-      turnstileToken: "",
     },
   });
 
@@ -100,6 +99,11 @@ export default function FormLogin(
           <Button type="submit" className="w-full" disabled={isPending || !captchaToken}>
             {isPending ? "Signing in..." : "Sign In"}
           </Button>
+          {!captchaToken && (
+            <p className="w-full text-center text-xs text-amber-500">
+              Selesaikan verifikasi captcha dulu sebelum login.
+            </p>
+          )}
         </CardFooter>
       </form>
     </Card>

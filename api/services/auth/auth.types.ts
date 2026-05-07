@@ -1,7 +1,7 @@
 export type LoginReq = {
     username: string;
     password: string;
-    turnstileToken: string;
+    turnstileToken?: string;
 }
 
 export type LoginRes = {
