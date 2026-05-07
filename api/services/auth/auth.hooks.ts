@@ -3,6 +3,20 @@ import { loginApi, logoutApi, meApi, registerApi } from "./auth.api";
 import { LoginRes } from "./auth.types";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
+
+type ApiErrorResponse = {
+  error?: string;
+  message?: string;
+};
+
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof AxiosError) {
+    const data = error.response?.data as ApiErrorResponse | undefined;
+    if (data?.message && data.message.length > 0) return data.message;
+  }
+  return fallback;
+}
     
 export const useLogin = () => {
     const router = useRouter()
@@ -13,7 +27,7 @@ export const useLogin = () => {
             router.push("/chat");
         },
         onError : (error) => {
-            toast.error(error.message);
+            toast.error(getApiErrorMessage(error, "Login gagal"));
         },
     })
 }
@@ -26,7 +40,7 @@ export const useRegister = () => {
             router.push("/chat");
         },
         onError : (error) => {
-            toast.error(error.message);
+            toast.error(getApiErrorMessage(error, "Register gagal"));
         },
     })
 }
@@ -40,7 +54,7 @@ export const useLogout = () => {
             router.push("/login");
         },
         onError : (error) => {
-            toast.error(error.message);
+            toast.error(getApiErrorMessage(error, "Logout gagal"));
         },
     })
 }
