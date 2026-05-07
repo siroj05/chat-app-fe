@@ -195,7 +195,7 @@ export default function Sidebar({
           showCloseButton={false}
         >
           <div className="bg-primary/10 w-full flex gap-2 p-2">
-            <SearchIcon className="my-auto" />
+            {/* <SearchIcon className="my-auto" /> */}
             <Input
               role="button"
               readOnly
@@ -212,7 +212,7 @@ export default function Sidebar({
   return (
     <div className="flex w-1/3 min-h-0 min-w-0 flex-col bg-secondary">
       <div className="bg-primary/10 w-full flex gap-2 p-2">
-        <SearchIcon className="my-auto" />
+        {/* <SearchIcon className="my-auto" /> */}
         <Input
           role="button"
           readOnly
