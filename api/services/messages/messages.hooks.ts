@@ -141,6 +141,32 @@ export const useChatWebSocket = (conversationId?: string) => {
               [targetConversationId]: [...existing, data.payload],
             };
           });
+
+          // Optimistically update the conversations list cache so the sidebar
+          // reflects the new last_message instantly (without waiting for refetch).
+          queryClient.setQueryData<{ conversations: Array<{
+            conversation_id: string;
+            username: string;
+            last_message: string | null;
+            last_message_at: string | null;
+          }> }>(["conversations"], (old) => {
+            if (!old) return old;
+            const updated = old.conversations.map((c) =>
+              c.conversation_id === targetConversationId
+                ? { ...c, last_message: data.payload.message, last_message_at: data.payload.created_at }
+                : c
+            );
+            // Sort so newest message is first.
+            updated.sort((a, b) => {
+              const at = a.last_message_at ? new Date(a.last_message_at).getTime() : 0;
+              const bt = b.last_message_at ? new Date(b.last_message_at).getTime() : 0;
+              return bt - at;
+            });
+            return { conversations: updated };
+          });
+
+          // Also invalidate so the server is the source of truth (handles edge cases
+          // like a brand-new conversation that isn't in the cache yet).
           queryClient.invalidateQueries({ queryKey: ["conversations"] });
         }
       };

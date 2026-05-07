@@ -8,10 +8,12 @@ export const useTargetUser = () => {
     const router = useRouter()
     return useMutation({
         mutationFn: targetUserApi,
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
             toast.success("Conversation created successfully")
+            // Await invalidation so the sidebar fetches the new conversation
+            // and joins its WS room before the user can start messaging.
+            await queryClient.invalidateQueries({ queryKey: ["conversations"] })
             router.push(`/chat?q=${data.conversationId}`)
-            queryClient.invalidateQueries({ queryKey: ["conversations"] })
         },
         onError: (error) => {
             toast.error(error.message)

@@ -37,13 +37,14 @@ export default function Sidebar({
   const activeConversationId = searchParams.get("q");
   const { data } = useGetConversationsList();
   const [livePatch, setLivePatch] = useState<
-    Record<string, { last_message: string; last_message_at: string }>
+    Record<string, { last_message: string; last_message_at: string; username?: string }>
   >({});
   const socketRef = useRef<WebSocket | null>(null);
   const conversationsRef = useRef<ConversationListItem[]>([]);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const conversations = useMemo(() => {
     const base = data?.conversations ?? [];
+    const knownIds = new Set(base.map((c) => c.conversation_id));
     const patched = base.map((c) => {
       const patch = livePatch[c.conversation_id];
       if (!patch) return c;
@@ -53,7 +54,22 @@ export default function Sidebar({
         last_message_at: patch.last_message_at,
       };
     });
-    return [...patched].sort((a, b) => {
+
+    // Add temporary entries for conversations that arrived via WS but
+    // haven't been fetched by the query yet (e.g. brand-new conversations).
+    const newEntries: ConversationListItem[] = [];
+    for (const [convId, patch] of Object.entries(livePatch)) {
+      if (!knownIds.has(convId)) {
+        newEntries.push({
+          conversation_id: convId,
+          username: patch.username ?? "...",
+          last_message: patch.last_message,
+          last_message_at: patch.last_message_at,
+        });
+      }
+    }
+
+    return [...patched, ...newEntries].sort((a, b) => {
       const at = a.last_message_at ? new Date(a.last_message_at).getTime() : 0;
       const bt = b.last_message_at ? new Date(b.last_message_at).getTime() : 0;
       return bt - at;
