@@ -24,7 +24,9 @@ COPY . .
 # Tetap di-set sebagai ENV juga supaya kode lain yang baca process.env.API_ORIGIN
 # di runtime (mis. server actions, route handlers) dapat nilai yang sama.
 ARG API_ORIGIN=http://localhost:3001
+ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY=
 ENV API_ORIGIN=$API_ORIGIN
+ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build
