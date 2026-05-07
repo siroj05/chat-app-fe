@@ -120,8 +120,8 @@ export default function Conversations({
       <>
         <div className="w-full flex justify-center items-center h-full text-primary">
           <div className="flex flex-col items-center gap-2">
-            <p className="text-xl font-semibold">Pilih seorang pengguna untuk memulai obrolan</p>
-            <MessageSquareText className="w-10 h-10" />
+            <p className="text-xl max-sm:text-xs font-semibold">Pilih seorang pengguna untuk memulai obrolan</p>
+            <MessageSquareText className="w-10 h-10 max-sm:w-5 max-sm:h-5" />
           </div>
         </div>
       </>
