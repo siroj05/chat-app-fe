@@ -57,11 +57,8 @@ function getWsUrl() {
   const fromEnv = process.env.NEXT_PUBLIC_WS_URL;
   if (fromEnv && fromEnv.length > 0) return fromEnv;
 
-  // Local dev: FE usually runs on :3000 and BE on :3001.
-  if (
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
-  ) {
+  // Dev rule: if FE runs on :3000 (localhost/LAN IP), WS backend is :3001.
+  if (window.location.port === "3000") {
     return `ws://${window.location.hostname}:3001/ws`;
   }
 

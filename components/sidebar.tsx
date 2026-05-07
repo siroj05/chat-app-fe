@@ -10,12 +10,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 
 function getWsUrl() {
+  if (typeof window === "undefined") return "";
   const fromEnv = process.env.NEXT_PUBLIC_WS_URL;
   if (fromEnv && fromEnv.length > 0) return fromEnv;
-  if (
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
-  ) {
+  // Dev rule: if FE runs on :3000 (localhost/LAN IP), WS backend is :3001.
+  if (window.location.port === "3000") {
     return `ws://${window.location.hostname}:3001/ws`;
   }
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
