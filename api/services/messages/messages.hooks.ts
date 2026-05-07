@@ -21,6 +21,9 @@ export const useSendMessage = () => {
       queryClient.invalidateQueries({
         queryKey: ["messages", variables.conversationId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["conversations"],
+      });
     },
     onError: (error) => {
       toast.error(error.message);
@@ -30,6 +33,7 @@ export const useSendMessage = () => {
 
 type RealtimeMessage = {
   id: string;
+  conversation_id: string;
   sender_id: string;
   message: string;
   created_at: string;
@@ -67,6 +71,7 @@ function getWsUrl() {
 }
 
 export const useChatWebSocket = (conversationId?: string) => {
+  const queryClient = useQueryClient();
   const socketRef = useRef<WebSocket | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeConversationIdRef = useRef<string | undefined>(conversationId);
@@ -125,10 +130,10 @@ export const useChatWebSocket = (conversationId?: string) => {
         }
 
         if (data.type === "new_message") {
-          const activeConversationId = activeConversationIdRef.current;
-          if (!activeConversationId) return;
+          const targetConversationId = data.payload.conversation_id;
+          if (!targetConversationId) return;
           setMessagesByConversation((prev) => {
-            const existing = prev[activeConversationId] ?? [];
+            const existing = prev[targetConversationId] ?? [];
 
             if (existing.find((m) => m.id === data.payload.id)) {
               return prev;
@@ -136,9 +141,10 @@ export const useChatWebSocket = (conversationId?: string) => {
 
             return {
               ...prev,
-              [activeConversationId]: [...existing, data.payload],
+              [targetConversationId]: [...existing, data.payload],
             };
           });
+          queryClient.invalidateQueries({ queryKey: ["conversations"] });
         }
       };
 
@@ -168,7 +174,7 @@ export const useChatWebSocket = (conversationId?: string) => {
       socketRef.current = null;
       setReadyState(WebSocket.CLOSED);
     };
-  }, []);
+  }, [queryClient]);
 
   const sendViaWs = (body: SendMessageBody) => {
     const socket = socketRef.current;
