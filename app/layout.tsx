@@ -13,9 +13,19 @@ const fontSans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
+export const viewport = {
+  themeColor: "#ffffff",
+};
+
 export const metadata: Metadata = {
   title: "jujurly",
   description: "jujurly is a chat application that allows you to chat with your friends and family",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Jujurly",
+  },
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon-16x16.png",

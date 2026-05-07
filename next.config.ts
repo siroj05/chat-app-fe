@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
+import withPWAInit from "@ducanh2912/next-pwa";
 
 const API_ORIGIN = process.env.API_ORIGIN ?? "http://localhost:3001";
+
+const withPWA = withPWAInit({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development", // Matikan saat mode dev agar tidak mengganggu
+});
 
 const nextConfig: NextConfig = {
   output: "standalone",
@@ -17,4 +23,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);
