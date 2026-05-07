@@ -27,17 +27,19 @@ function ChatContent() {
   const conversationId = searchParams.get("q");
   const [openSidebar, setOpenSidebar] = useState(false);
   const { data: messages } = useGetMessages(conversationId as string);
+  const isMobile = useIsMobile()
 
-  const onTargetUser = (id: string) => {
-    targetUser(id);
-    setOpen(false);
-  };
   const { data: me } = useMe();
   const { data: conversation } = useGetConversation(conversationId as string);
   const { mutate: sendMessage, isPending: isPendingSendMessage } = useSendMessage();
   const { realtimeMessages, sendViaWs, isConnected } = useChatWebSocket(
     conversationId ?? undefined
   );
+
+  const onTargetUser = (id: string) => {
+    targetUser(id);
+    setOpen(false);
+  };
 
   const mergedMessages = (() => {
     const base = messages?.messages ?? [];
@@ -80,7 +82,7 @@ function ChatContent() {
       }
     }
   };
-  const isMobile = useIsMobile()
+
   return (
     <>
       <div className="flex min-h-0 flex-1 w-full">
@@ -108,6 +110,7 @@ function ChatContent() {
   );
 }
 
+// suspense fix error
 export default function ChatPage() {
   return (
     <Suspense>

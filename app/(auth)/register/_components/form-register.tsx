@@ -14,15 +14,18 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginReq, loginSchema } from "@/api/services/auth";
+import Turnstile from "react-turnstile";
 
 interface FormRegisterProps {
   onsubmit : (data : LoginReq) => void;
   isPending : boolean;
   isSuccess : boolean;
+  setCaptchaToken : (token : string) => void;
+  captchaToken : string;
 }
 
 export default function FormRegister(
-    {onsubmit, isPending} : FormRegisterProps
+    {onsubmit, isPending, setCaptchaToken, captchaToken} : FormRegisterProps
 ) {
   const {
     handleSubmit,
@@ -33,6 +36,7 @@ export default function FormRegister(
     defaultValues: {
       username: "",
       password: "",
+      turnstileToken: "",
     },
   });
 
@@ -76,10 +80,24 @@ export default function FormRegister(
               <Input id="password" type="password" {...register("password")} required />
               {errors.password && <p className="text-red-500">{errors.password.message}</p>}
             </div>
+            <div className="grid gap-2">
+              <Turnstile
+                sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""}
+                onVerify={(token) => {
+                  setCaptchaToken(token);
+                }}
+                onExpire={() => {
+                  setCaptchaToken("");
+                }}
+                onError={() => {
+                  setCaptchaToken("");
+                }}
+              />
+            </div>
           </div>
         </CardContent>
         <CardFooter className="flex-col gap-2">
-          <Button type="submit" className="w-full" disabled={isPending}>
+          <Button type="submit" className="w-full" disabled={isPending || !captchaToken}>
             {isPending ? "Registering..." : "Register"}
           </Button>
         </CardFooter>

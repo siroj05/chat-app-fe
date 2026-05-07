@@ -3,6 +3,7 @@ import { z } from "zod";
 export const loginSchema = z.object({
     username : z.string().min(3).max(32),
     password : z.string().min(6).max(128),
+    turnstileToken : z.string().min(1),
 })
 
 export type LoginSchema = z.infer<typeof loginSchema>;

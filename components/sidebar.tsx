@@ -177,7 +177,7 @@ export default function Sidebar({
                 : "border-border bg-background/40 hover:bg-background/70"
             }`}
           >
-            <div className="text-sm font-semibold">{conversation.username}</div>
+            <div className="text-sm font-semibold text-primary">{conversation.username}</div>
             <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
               {conversation.last_message ?? "Belum ada pesan"}
             </div>

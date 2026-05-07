@@ -3,7 +3,7 @@ import { SendMessageSchema } from "@/api/services/messages";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import { SendIcon } from "lucide-react";
+import { MessageSquareText, SendIcon } from "lucide-react";
 import React, { useRef } from "react";
 import { UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import { useEffect } from "react";
@@ -56,7 +56,7 @@ export default function Conversations({
   return (
     <div className="min-h-0 min-w-0 flex-1 flex flex-col justify-between">
       <div className="flex min-h-0 flex-1 flex-col">
-        {sender.username && <div className="shrink-0 bg-secondary p-4 font-semibold border">
+        {sender.username && <div className="shrink-0 bg-secondary p-4 font-semibold border text-primary">
           {sender.username}
         </div>}
         <div className="min-h-0 flex-1 overflow-y-auto p-4 text-white space-y-2">
@@ -95,7 +95,7 @@ export default function Conversations({
         </div>
       </div>
       
-      <form
+      {sender.conversationId ? <form
         onSubmit={handleSubmit(onSendMessage)}
         className="flex gap-2 p-2 bg-secondary"
       >
@@ -116,7 +116,16 @@ export default function Conversations({
             <Spinner className="w-4 h-4" />
           )}
         </Button>
-      </form>
+      </form> : 
+      <>
+        <div className="w-full flex justify-center items-center h-full text-primary">
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-xl font-semibold">Pilih seorang pengguna untuk memulai obrolan</p>
+            <MessageSquareText className="w-10 h-10" />
+          </div>
+        </div>
+      </>
+      }
     </div>
   );
 }
