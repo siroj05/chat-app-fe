@@ -10,7 +10,6 @@ export function CardLogin() {
   const {mutate, isPending, isSuccess} = useLogin()
 
   const onsubmit = (data : LoginReq) => {
-    console.log("captchaToken ==== ", captchaToken)
     if (!captchaToken) {
       toast.error("Silakan selesaikan captcha terlebih dahulu");
       return;
