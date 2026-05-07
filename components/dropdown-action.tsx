@@ -10,8 +10,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { LoginRes } from "@/api/services/auth/auth.types"
+import { useRouter } from "next/navigation"
 
-export function DropdownAction({user, onlogout, isPending}: {user: LoginRes, onlogout: () => void, isPending: boolean}) {
+export function DropdownAction({user, onlogout, isPending, showUserMgmt}: {user: LoginRes, onlogout: () => void, isPending: boolean, showUserMgmt?: boolean}) {
+  const router = useRouter()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
@@ -20,6 +22,11 @@ export function DropdownAction({user, onlogout, isPending}: {user: LoginRes, onl
       <DropdownMenuContent>
         <DropdownMenuGroup>
           <DropdownMenuLabel>{user.username}</DropdownMenuLabel>
+          {showUserMgmt && (
+            <DropdownMenuItem onClick={() => router.push("/users/manage")}>
+              Kelola user
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem>
             Profile
             <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>

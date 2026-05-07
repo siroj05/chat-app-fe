@@ -3,6 +3,7 @@ import { useLogout, useMe } from "@/api/services/auth";
 import { MessageSquareText } from "lucide-react";
 import { DropdownAction } from "./dropdown-action";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { isUserMgmtAdmin } from "@/lib/user-mgmt-admin";
 
 const RECONNECT_MS = 1500;
 
@@ -104,8 +105,13 @@ export const Navbar = () => {
           <span className={`h-4 w-4 rounded ${indicator.dot}`} />
           <span className={indicator.textColor}>{indicator.text}</span>
         </div>
-        {isSuccess && (
-          <DropdownAction user={data?.user} onlogout={onlogout} isPending={isPending} />
+        {isSuccess && data?.user && (
+          <DropdownAction
+            user={data.user}
+            onlogout={onlogout}
+            isPending={isPending}
+            showUserMgmt={isUserMgmtAdmin(data.user.username)}
+          />
         )}
       </div>
     </div>

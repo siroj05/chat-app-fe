@@ -1,3 +1,5 @@
+"use client";
+
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { loginApi, logoutApi, meApi, registerApi } from "./auth.api";
 import { LoginRes } from "./auth.types";

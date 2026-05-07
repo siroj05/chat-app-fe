@@ -1,3 +1,5 @@
+"use client";
+
 import { useMe } from "@/api/services/auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -20,6 +22,7 @@ export function useHasSession() {
     },[me, isSuccess, router])
 
     return {
-        hasSession: me && hasSessionPayload(me)
+        hasSession: me && hasSessionPayload(me),
+        user: me?.user
     }
 }

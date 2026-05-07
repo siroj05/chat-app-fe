@@ -1,3 +1,6 @@
 export * from "./auth.api"
 export * from "./auth.hooks"
 export * from "./auth.types"
+export * from "./users-mgmt.api"
+export * from "./users-mgmt.hooks"
+export * from "./users-mgmt.types"
