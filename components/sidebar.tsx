@@ -1,6 +1,6 @@
 "use client";
 import { Input } from "./ui/input";
-import { SearchIcon } from "lucide-react";
+import { RefreshCwIcon, SearchIcon } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Sheet, SheetContent } from "./ui/sheet";
@@ -8,6 +8,7 @@ import { useGetConversationsList } from "@/api/services/conversations";
 import { ConversationListItem } from "@/api/services/conversations/conversations.types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { Button } from "./ui/button";
 
 function getWsUrl() {
   if (typeof window === "undefined") return "";
@@ -186,11 +187,10 @@ export default function Sidebar({
             key={conversation.conversation_id}
             type="button"
             onClick={() => selectConversation(conversation.conversation_id)}
-            className={`w-full rounded-lg border p-3 text-left transition ${
-              active
-                ? "border-primary bg-primary/10"
-                : "border-border bg-background/40 hover:bg-background/70"
-            }`}
+            className={`w-full rounded-lg border p-3 text-left transition ${active
+              ? "border-primary bg-primary/10"
+              : "border-border bg-background/40 hover:bg-background/70"
+              }`}
           >
             <div className="text-sm font-semibold text-primary">{conversation.username}</div>
             <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
@@ -211,7 +211,6 @@ export default function Sidebar({
           showCloseButton={false}
         >
           <div className="bg-primary/10 w-full flex gap-2 p-2">
-            {/* <SearchIcon className="my-auto" /> */}
             <Input
               role="button"
               readOnly
@@ -228,7 +227,6 @@ export default function Sidebar({
   return (
     <div className="flex w-1/3 min-h-0 min-w-0 flex-col bg-secondary">
       <div className="bg-primary/10 w-full flex gap-2 p-2">
-        {/* <SearchIcon className="my-auto" /> */}
         <Input
           role="button"
           readOnly
@@ -236,6 +234,11 @@ export default function Sidebar({
           className="bg-secondary rounded-full cursor-pointer"
           placeholder="Cari..."
         />
+        <Button onClick={() => queryClient.invalidateQueries({ queryKey: ["conversations"] })}
+          size="icon"
+          className="rounded-full">
+          <RefreshCwIcon className="my-auto" />
+        </Button>
       </div>
       {renderConversationItems}
     </div>
