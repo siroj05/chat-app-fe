@@ -80,6 +80,7 @@ export const useLogout = () => {
 };
 
 export const useMe = () => {
+  const router = useRouter()
   return useQuery({
     queryKey: ["auth"],
     queryFn: meApi,
@@ -87,6 +88,9 @@ export const useMe = () => {
     retry: (failureCount, error) => {
       if (error instanceof AxiosError && error.response?.status === 401) {
         return false;
+      }
+      if (error instanceof AxiosError && error.response?.status === 500) {
+        router.push("/login")
       }
       return failureCount < 2;
     },
