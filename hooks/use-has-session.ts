@@ -4,7 +4,6 @@ import { useMe } from "@/api/services/auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-/** Bentuk sama dengan response `GET /api/auth/me` dan login (`{ user: … }`). */
 export function hasSessionPayload(data: unknown): boolean {
     if (!data || typeof data !== "object") return false;
     const o = data as { user?: { id?: string } };
@@ -13,25 +12,14 @@ export function hasSessionPayload(data: unknown): boolean {
 
 
 export function useHasSession() {
-    const { data: me, isSuccess } = useMe()
+    const { data: me } = useMe()
     const router = useRouter()
-    console.log("me = ", me)
-
 
     useEffect(() => {
-        console.log("isSuccess = ", isSuccess)
-        if (isSuccess) {
-            console.log("masuk ke is success")
-            router.push("/login")
+        if (me && hasSessionPayload(me)) {
+            router.push("/chat")
         }
-    }, [isSuccess])
-
-    // useEffect(() => {
-    //     if (me && hasSessionPayload(me)) {
-    //         console.log("kesini juga masuk")
-    //         router.push("/chat")
-    //     }
-    // }, [me, isSuccess, router])
+    }, [me, router])
 
     return {
         hasSession: me && hasSessionPayload(me),

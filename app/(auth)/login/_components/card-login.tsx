@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 export function CardLogin() {
   const [captchaToken, setCaptchaToken] = useState<string>("")
   const { mutate, isPending, isSuccess } = useLogin()
-  const router = useRouter()
 
   const onsubmit = (data: LoginReq) => {
     if (!captchaToken) {
@@ -25,14 +24,6 @@ export function CardLogin() {
       } as LoginReq
     )
   }
-
-  useEffect(() => {
-    console.log("isSuccess = ", isSuccess)
-    if (isSuccess) {
-      console.log("lets goooo")
-      router.push("/chat")
-    }
-  }, [isSuccess])
 
   return <FormLogin onsubmit={onsubmit} isPending={isPending} isSuccess={isSuccess} setCaptchaToken={setCaptchaToken} captchaToken={captchaToken} />
 }
