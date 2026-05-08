@@ -70,13 +70,24 @@ export default function Sidebar({
 
     for (const m of newMessages) {
       if (m.sender_id !== me?.user?.id) {
+        // Cari username dari data list conversations
+        const senderConv = conversations.find(c => c.conversation_id === m.conversation_id);
+        const senderName = senderConv?.username || "Pengguna";
+
         const preview = m.message.length > 50
           ? m.message.slice(0, 50) + "..."
           : m.message
-        toast(preview, { position: "top-center" })
+        
+        toast(`${senderName}: ${preview}`, { 
+          position: "top-center",
+          action: {
+            label: "Balas",
+            onClick: () => selectConversation(m.conversation_id),
+          },
+        })
       }
     }
-  }, [realtimeMessages, me?.user?.id])
+  }, [realtimeMessages, me?.user?.id, conversations, selectConversation])
 
   if (isMobile) {
     return (
