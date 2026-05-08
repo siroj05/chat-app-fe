@@ -103,6 +103,15 @@ export default function Conversations({
           {...register("message")}
           id="message"
           placeholder="Tulis pesan..."
+          onKeyDown={(e) => {
+            if (e.key == "Enter" && !e.shiftKey) {
+              e.preventDefault()
+
+              if (!e.currentTarget.value.trim()) return;
+
+              handleSubmit(onSendMessage)();
+            }
+          }}
         />
         <Button
           size="lg"

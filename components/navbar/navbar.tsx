@@ -22,7 +22,7 @@ export const Navbar = () => {
         <Link href="/chat" className="my-auto text-primary">
           Jujurly
         </Link>
-        <span className="text-xs text-slate-500">v1.4.0</span>
+        <span className="text-xs text-slate-500">v1.4.1</span>
       </h1>
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 p-1 text-xs">
