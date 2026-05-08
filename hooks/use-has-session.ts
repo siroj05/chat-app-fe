@@ -15,13 +15,23 @@ export function hasSessionPayload(data: unknown): boolean {
 export function useHasSession() {
     const { data: me, isSuccess } = useMe()
     const router = useRouter()
+    console.log("me = ", me)
+
 
     useEffect(() => {
-        if (me && hasSessionPayload(me)) {
-            console.log("kesini juga masuk")
-            router.push("/chat")
+        console.log("isSuccess = ", isSuccess)
+        if (isSuccess) {
+            console.log("masuk ke is success")
+            router.push("/login")
         }
-    }, [me, isSuccess, router])
+    }, [isSuccess])
+
+    // useEffect(() => {
+    //     if (me && hasSessionPayload(me)) {
+    //         console.log("kesini juga masuk")
+    //         router.push("/chat")
+    //     }
+    // }, [me, isSuccess, router])
 
     return {
         hasSession: me && hasSessionPayload(me),
