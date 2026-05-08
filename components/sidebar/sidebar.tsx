@@ -11,6 +11,9 @@ import { Button } from "../ui/button";
 import { useConverSations, useConversationWebSocket, useJoinAllRef } from "./handlers";
 import SidebarMobile from "./sidebar-mobile";
 import RenderConversations from "./render-conversations";
+import { toast } from "sonner";
+import { useChatWebSocket } from "@/api/services/messages";
+import { useMe } from "@/api/services/auth";
 
 export default function Sidebar({
   setOpen,
@@ -52,6 +55,28 @@ export default function Sidebar({
     router.push(`/chat?q=${conversationId}`);
     if (isMobile) setOpenSidebar(false);
   };
+
+  const conversationId = searchParams.get("q");
+
+  const prevRealtimeCountRef = useRef(0)
+  const { realtimeMessages } = useChatWebSocket(
+    conversationId ?? undefined
+  );
+  const { data: me } = useMe();
+
+  useEffect(() => {
+    const newMessages = realtimeMessages.slice(prevRealtimeCountRef.current)
+    prevRealtimeCountRef.current = realtimeMessages.length
+
+    for (const m of newMessages) {
+      if (m.sender_id !== me?.user?.id) {
+        const preview = m.message.length > 50
+          ? m.message.slice(0, 50) + "..."
+          : m.message
+        toast(preview, { position: "top-center" })
+      }
+    }
+  }, [realtimeMessages, me?.user?.id])
 
   if (isMobile) {
     return (

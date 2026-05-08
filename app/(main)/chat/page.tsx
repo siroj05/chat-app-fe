@@ -28,7 +28,6 @@ function ChatContent() {
   const [openSidebar, setOpenSidebar] = useState(false);
   const { data: messages } = useGetMessages(conversationId as string);
   const isMobile = useIsMobile()
-
   const { data: me } = useMe();
   const { data: conversation } = useGetConversation(conversationId as string);
   const { mutate: sendMessage, isPending: isPendingSendMessage } = useSendMessage();
@@ -82,21 +81,6 @@ function ChatContent() {
       }
     }
   };
-
-  const prevRealtimeCountRef = useRef(0)
-  useEffect(() => {
-    const newMessages = realtimeMessages.slice(prevRealtimeCountRef.current)
-    prevRealtimeCountRef.current = realtimeMessages.length
-
-    for (const m of newMessages) {
-      if (m.sender_id !== me?.user?.id) {
-        const preview = m.message.length > 50
-          ? m.message.slice(0, 50) + "..."
-          : m.message
-        toast(preview, { position: "top-center" })
-      }
-    }
-  }, [realtimeMessages, me?.user?.id])
 
   return (
     <>
