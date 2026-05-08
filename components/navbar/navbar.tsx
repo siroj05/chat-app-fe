@@ -20,7 +20,7 @@ export const Navbar = () => {
         <p className="my-auto">
           JUJURLY
         </p>
-        <span className="text-xs text-slate-500">v1.1.0</span>
+        <span className="text-xs text-slate-500">v1.3.1</span>
       </h1>
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 p-1 text-xs">
