@@ -99,7 +99,12 @@ export const useConversationWebSocket = (
             socketRef.current = ws;
 
             ws.onopen = () => {
+                // Join semua conversations setelah koneksi terbuka
                 joinAllRef.current?.();
+                // Invalidate setelah join agar sidebar langsung segar
+                queryClient.invalidateQueries({
+                    queryKey: ["conversations"],
+                });
             };
 
             ws.onmessage = (event) => {
@@ -149,9 +154,7 @@ export const useConversationWebSocket = (
         };
 
         connect();
-        queryClient.invalidateQueries({
-            queryKey: ["conversations"],
-        });
+
         return () => {
             isUnmounted = true;
 
@@ -162,5 +165,6 @@ export const useConversationWebSocket = (
             socketRef.current?.close();
             socketRef.current = null;
         };
-    }, [queryClient, socketRef, joinAllRef, setLivePatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 };

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getMessagesApi, sendMessageApi } from "./messages.api";
 import { toast } from "sonner";
 import { SendMessageBody } from "./messages.types";
+import { getWsUrl } from "@/lib/ws-url";
 
 export const useGetMessages = (id: string) => {
   return useQuery({
@@ -41,31 +42,15 @@ type RealtimeMessage = {
 
 type WsServerEvent =
   | {
-      type: "new_message";
-      payload: RealtimeMessage;
-      message: string;
-    }
-  | {
-      type: "error";
-      message: string;
-      payload: RealtimeMessage;
-    };
-
-function getWsUrl() {
-  if (typeof window === "undefined") return "";
-  // Allow explicit override per environment (recommended for production).
-  const fromEnv = process.env.NEXT_PUBLIC_WS_URL;
-  if (fromEnv && fromEnv.length > 0) return fromEnv;
-
-  // Dev rule: if FE runs on :3000 (localhost/LAN IP), WS backend is :3001.
-  if (window.location.port === "3000") {
-    return `ws://${window.location.hostname}:3001/ws`;
+    type: "new_message";
+    payload: RealtimeMessage;
+    message: string;
   }
-
-  // Default same-origin deployment.
-  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  return `${protocol}//${window.location.host}/ws`;
-}
+  | {
+    type: "error";
+    message: string;
+    payload: RealtimeMessage;
+  };
 
 export const useChatWebSocket = (conversationId?: string) => {
   const queryClient = useQueryClient();
@@ -144,12 +129,14 @@ export const useChatWebSocket = (conversationId?: string) => {
 
           // Optimistically update the conversations list cache so the sidebar
           // reflects the new last_message instantly (without waiting for refetch).
-          queryClient.setQueryData<{ conversations: Array<{
-            conversation_id: string;
-            username: string;
-            last_message: string | null;
-            last_message_at: string | null;
-          }> }>(["conversations"], (old) => {
+          queryClient.setQueryData<{
+            conversations: Array<{
+              conversation_id: string;
+              username: string;
+              last_message: string | null;
+              last_message_at: string | null;
+            }>
+          }>(["conversations"], (old) => {
             if (!old) return old;
             const updated = old.conversations.map((c) =>
               c.conversation_id === targetConversationId
