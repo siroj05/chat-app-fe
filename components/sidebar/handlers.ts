@@ -123,6 +123,13 @@ export const useConversationWebSocket = (
                     return;
                 }
 
+                // Backend minta FE untuk refetch list conversations
+                // (misal: ada conversation baru yang belum di-join via WS)
+                if (parsed.type === "refresh_conversations") {
+                    queryClient.invalidateQueries({ queryKey: ["conversations"] });
+                    return;
+                }
+
                 if (parsed.type !== "new_message" || !parsed.payload) return;
 
                 const payload = parsed.payload;
@@ -135,9 +142,7 @@ export const useConversationWebSocket = (
                     },
                 }));
 
-                queryClient.invalidateQueries({
-                    queryKey: ["conversations"],
-                });
+                queryClient.invalidateQueries({ queryKey: ["conversations"] });
             };
 
             ws.onclose = () => {
