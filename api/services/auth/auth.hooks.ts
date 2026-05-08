@@ -23,7 +23,7 @@ function getApiErrorMessage(error: unknown, fallback: string) {
   }
   return fallback;
 }
-    
+
 export const useLogin = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -32,7 +32,7 @@ export const useLogin = () => {
     onSuccess: (data: { user: LoginRes }) => {
       queryClient.setQueryData(["auth"], data);
       toast.success("Login berhasil, selamat datang " + data.user.username);
-      router.replace("/chat");
+      router.push("/chat");
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Login gagal"));
