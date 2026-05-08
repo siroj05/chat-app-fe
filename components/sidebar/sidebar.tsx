@@ -69,7 +69,6 @@ export default function Sidebar({
       />
     );
   }
-
   // sidebar dekstop view
   return (
     <div className="flex w-1/3 min-h-0 min-w-0 flex-col bg-secondary">

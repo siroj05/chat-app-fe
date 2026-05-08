@@ -149,7 +149,9 @@ export const useConversationWebSocket = (
         };
 
         connect();
-
+        queryClient.invalidateQueries({
+            queryKey: ["conversations"],
+        });
         return () => {
             isUnmounted = true;
 
