@@ -32,6 +32,12 @@ export const useLogin = () => {
     onSuccess: (data: { user: LoginRes }) => {
       queryClient.setQueryData(["auth"], data);
       toast.success("Login berhasil, selamat datang " + data.user.username);
+      // router.refresh() HARUS dipanggil sebelum push:
+      // Next.js App Router menyimpan RSC response di router cache.
+      // Sebelum login, /chat pernah di-cache sebagai redirect -> /login (middleware).
+      // Tanpa refresh(), router.push("/chat") akan menggunakan cache lama itu
+      // dan user tidak pindah ke /chat meski cookie sudah ada.
+      router.refresh();
       router.push("/chat");
     },
     onError: (error) => {
@@ -48,6 +54,7 @@ export const useRegister = () => {
     onSuccess: (data: { user: LoginRes }) => {
       queryClient.setQueryData(["auth"], data);
       toast.success("Register berhasil, selamat datang " + data.user.username);
+      router.refresh();
       router.replace("/chat");
     },
     onError: (error) => {
