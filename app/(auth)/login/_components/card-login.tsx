@@ -2,14 +2,16 @@
 
 import { LoginReq, useLogin } from "@/api/services/auth";
 import FormLogin from "./form.login";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export function CardLogin() {
   const [captchaToken, setCaptchaToken] = useState<string>("")
-  const {mutate, isPending, isSuccess} = useLogin()
+  const { mutate, isPending, isSuccess } = useLogin()
+  const router = useRouter()
 
-  const onsubmit = (data : LoginReq) => {
+  const onsubmit = (data: LoginReq) => {
     if (!captchaToken) {
       toast.error("Silakan selesaikan captcha terlebih dahulu");
       return;
@@ -24,5 +26,13 @@ export function CardLogin() {
     )
   }
 
-  return <FormLogin onsubmit={onsubmit} isPending={isPending} isSuccess={isSuccess} setCaptchaToken={setCaptchaToken} captchaToken={captchaToken}/>
+  useEffect(() => {
+    console.log("isSuccess = ", isSuccess)
+    if (isSuccess) {
+      console.log("lets goooo")
+      router.push("/chat")
+    }
+  }, [isSuccess])
+
+  return <FormLogin onsubmit={onsubmit} isPending={isPending} isSuccess={isSuccess} setCaptchaToken={setCaptchaToken} captchaToken={captchaToken} />
 }
