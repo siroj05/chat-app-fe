@@ -9,7 +9,7 @@ export const useTargetUser = () => {
     return useMutation({
         mutationFn: targetUserApi,
         onSuccess: async (data) => {
-            toast.success("Conversation created successfully")
+            // toast.success("Conversation created successfully")
             // Await invalidation so the sidebar fetches the new conversation
             // and joins its WS room before the user can start messaging.
             await queryClient.invalidateQueries({ queryKey: ["conversations"] })
@@ -22,7 +22,7 @@ export const useTargetUser = () => {
     })
 }
 
-export const useGetConversation = (id : string) => {
+export const useGetConversation = (id: string) => {
     return useQuery({
         queryKey: ["conversation", id],
         queryFn: () => getConversationApi(id),

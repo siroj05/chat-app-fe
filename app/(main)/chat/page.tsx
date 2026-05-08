@@ -14,7 +14,7 @@ import {
 import { useMe } from "@/api/services/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import Sidebar from "@/components/sidebar";
+import Sidebar from "@/components/sidebar/sidebar";
 import { Button } from "@/components/ui/button";
 import { SearchIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -89,7 +89,7 @@ function ChatContent() {
         <Sidebar setOpen={setOpen} openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
         {/* conversations content */}
         {isMobile && <Button onClick={() => setOpenSidebar(true)} variant="outline" size="icon" className="absolute top-1/6 left-4 rounded-full">
-          <SearchIcon className="w-4 h-4"/>
+          <SearchIcon className="w-4 h-4" />
         </Button>}
         <Conversations
           onSendMessage={onSendMessage}
