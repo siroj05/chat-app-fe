@@ -9,8 +9,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const { hasSession } = useHasSession()
     const router = useRouter()
     useEffect(() => {
+        console.log("masukkk")
         if (hasSession) {
             const interval = setInterval(() => {
+                console.log("harusnya redirect ke chat")
                 router.push(`/chat`);
             }, 3000);
 
