@@ -17,8 +17,8 @@ export const Navbar = () => {
     <div className="flex justify-between w-full shrink-0 bg-secondary text-secondary-foreground p-4 border-b">
       <h1 className="text-2xl font-bold flex gap-2">
         <MessageSquareText className="text-primary my-auto" />
-        <p className="my-auto">
-          JUJURLY
+        <p className="my-auto text-primary">
+          Jujurly
         </p>
         <span className="text-xs text-slate-500">v1.3.1</span>
       </h1>
