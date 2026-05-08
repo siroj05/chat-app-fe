@@ -4,6 +4,8 @@ import { MessageSquareText } from "lucide-react";
 import { DropdownAction } from "../dropdown-action";
 import { isUserMgmtAdmin } from "@/lib/user-mgmt-admin";
 import { useIndicator } from "./helper";
+import { Button } from "../ui/button";
+import Link from "next/link";
 
 export const Navbar = () => {
   const { mutate, isPending } = useLogout()
@@ -17,10 +19,10 @@ export const Navbar = () => {
     <div className="flex justify-between w-full shrink-0 bg-secondary text-secondary-foreground p-4 border-b">
       <h1 className="text-2xl font-bold flex gap-2">
         <MessageSquareText className="text-primary my-auto" />
-        <p className="my-auto text-primary">
+        <Link href="/chat" className="my-auto text-primary">
           Jujurly
-        </p>
-        <span className="text-xs text-slate-500">v1.3.1</span>
+        </Link>
+        <span className="text-xs text-slate-500">v1.3.2</span>
       </h1>
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 p-1 text-xs">
