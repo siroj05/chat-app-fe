@@ -1,5 +1,5 @@
 "use client";
-import { useState, Suspense } from "react";
+import { useState, Suspense, useRef, useEffect } from "react";
 import Conversations from "./_components/conversation";
 import { SearchDialog } from "@/components/search-dialog";
 import { useGetConversation, useTargetUser } from "@/api/services/conversations";
@@ -82,6 +82,21 @@ function ChatContent() {
       }
     }
   };
+
+  const prevRealtimeCountRef = useRef(0)
+  useEffect(() => {
+    const newMessages = realtimeMessages.slice(prevRealtimeCountRef.current)
+    prevRealtimeCountRef.current = realtimeMessages.length
+
+    for (const m of newMessages) {
+      if (m.sender_id !== me?.user?.id) {
+        const preview = m.message.length > 50
+          ? m.message.slice(0, 50) + "..."
+          : m.message
+        toast(preview, { position: "top-center" })
+      }
+    }
+  }, [realtimeMessages, me?.user?.id])
 
   return (
     <>

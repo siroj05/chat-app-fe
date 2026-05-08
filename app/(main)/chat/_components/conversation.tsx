@@ -94,7 +94,7 @@ export default function Conversations({
           <div ref={bottomRef} />
         </div>
       </div>
-      
+
       {sender.conversationId ? <form
         onSubmit={handleSubmit(onSendMessage)}
         className="flex gap-2 p-2 bg-secondary"
@@ -116,15 +116,15 @@ export default function Conversations({
             <Spinner className="w-4 h-4" />
           )}
         </Button>
-      </form> : 
-      <>
-        <div className="w-full flex justify-center items-center h-full text-primary">
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-xl max-sm:text-xs font-semibold">Pilih seorang pengguna untuk memulai obrolan</p>
-            <MessageSquareText className="w-10 h-10 max-sm:w-5 max-sm:h-5" />
+      </form> :
+        <>
+          <div className="w-full flex justify-center items-center h-full text-primary">
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-xl max-sm:text-xs font-semibold">Pilih seorang pengguna untuk memulai obrolan</p>
+              <MessageSquareText className="w-10 h-10 max-sm:w-5 max-sm:h-5" />
+            </div>
           </div>
-        </div>
-      </>
+        </>
       }
     </div>
   );
