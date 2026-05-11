@@ -1,17 +1,30 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { getMessagesApi, sendMessageApi } from "./messages.api";
 import { toast } from "sonner";
-import { SendMessageBody } from "./messages.types";
+import { SendMessageBody, type GetMessagesRes } from "./messages.types";
 import { getWsUrl } from "@/lib/ws-url";
 
+const MESSAGES_PER_PAGE = 50;
+
 export const useGetMessages = (id: string) => {
-  return useQuery({
+  return useInfiniteQuery<GetMessagesRes>({
     queryKey: ["messages", id],
-    queryFn: () => getMessagesApi(id),
+    queryFn: ({ pageParam }) =>
+      getMessagesApi(id, {
+        limit: MESSAGES_PER_PAGE,
+        cursor: pageParam as string | undefined,
+      }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: !!id,
   });
 };
+
 
 export const useSendMessage = () => {
   const queryClient = useQueryClient();

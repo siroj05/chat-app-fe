@@ -1,5 +1,5 @@
 "use client";
-import { useState, Suspense, useRef, useEffect } from "react";
+import { useState, Suspense } from "react";
 import Conversations from "./_components/conversation";
 import { SearchDialog } from "@/components/search-dialog";
 import { useGetConversation, useTargetUser } from "@/api/services/conversations";
@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { SearchIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useMemo } from "react";
 
 function ChatContent() {
   const [open, setOpen] = useState(false);
@@ -26,8 +27,13 @@ function ChatContent() {
   const searchParams = useSearchParams();
   const conversationId = searchParams.get("q");
   const [openSidebar, setOpenSidebar] = useState(false);
-  const { data: messages } = useGetMessages(conversationId as string);
-  const isMobile = useIsMobile()
+  const {
+    data: messagesData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useGetMessages(conversationId as string);
+  const isMobile = useIsMobile();
   const { data: me } = useMe();
   const { data: conversation } = useGetConversation(conversationId as string);
   const { mutate: sendMessage, isPending: isPendingSendMessage } = useSendMessage();
@@ -40,10 +46,13 @@ function ChatContent() {
     setOpen(false);
   };
 
-  const mergedMessages = (() => {
-    const base = messages?.messages ?? [];
-    if (realtimeMessages.length === 0) return base;
-    const map = new Map(base.map((m) => [m.id, m]));
+  const mergedMessages = useMemo(() => {
+    const pagesMessages =
+      messagesData?.pages.flatMap((page) => page.messages).reverse() ?? [];
+
+    if (realtimeMessages.length === 0) return pagesMessages;
+
+    const map = new Map(pagesMessages.map((m) => [m.id, m]));
     for (const item of realtimeMessages) {
       map.set(item.id, item);
     }
@@ -51,7 +60,7 @@ function ChatContent() {
       (a, b) =>
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
-  })();
+  }, [messagesData, realtimeMessages]);
 
   const { register, handleSubmit, resetField } = useForm<SendMessageSchema>({
     resolver: zodResolver(sendMessageSchema),
@@ -98,6 +107,9 @@ function ChatContent() {
           register={register}
           handleSubmit={handleSubmit}
           isLoading={isPendingSendMessage}
+          hasOlderMessages={!!hasNextPage}
+          isLoadingOlder={isFetchingNextPage}
+          onLoadOlder={fetchNextPage}
         />
       </div>
       <SearchDialog
