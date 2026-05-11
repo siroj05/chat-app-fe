@@ -51,7 +51,14 @@ export default function Conversations({
       <div className="flex min-h-0 flex-1 flex-col">
         {sender.username && (
           <div className="shrink-0 bg-secondary p-4 font-semibold border text-primary">
-            {sender.username}
+            <div className="flex gap-2 w-full">
+              <div className="bg-primary w-10 h-10 rounded-full flex justify-center items-center text-white">
+                <p>{sender.username.split('')[0].toUpperCase()}</p>
+              </div>
+              <p className="my-auto">
+                {sender.username}
+              </p>
+            </div>
           </div>
         )}
         {/*

@@ -11,8 +11,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { LoginRes } from "@/api/services/auth/auth.types"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
-export function DropdownAction({user, onlogout, isPending, showUserMgmt}: {user: LoginRes, onlogout: () => void, isPending: boolean, showUserMgmt?: boolean}) {
+export function DropdownAction({ user, onlogout, isPending, showUserMgmt }: { user: LoginRes, onlogout: () => void, isPending: boolean, showUserMgmt?: boolean }) {
   const router = useRouter()
   return (
     <DropdownMenu>
@@ -27,10 +28,12 @@ export function DropdownAction({user, onlogout, isPending, showUserMgmt}: {user:
               Kelola user
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem>
-            Profile
-            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-          </DropdownMenuItem>
+          <Link href="/profile">
+            <DropdownMenuItem>
+              Profile
+              <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem>
             Settings
             <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>

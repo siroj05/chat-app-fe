@@ -20,14 +20,19 @@ export default function RenderConversations({
                         key={conversation.conversation_id}
                         type="button"
                         onClick={() => selectConversation(conversation.conversation_id)}
-                        className={`w-full rounded-lg border p-3 text-left transition ${active
+                        className={`w-full flex gap-2 rounded-lg border p-3 text-left transition ${active
                             ? "border-primary bg-primary/10"
                             : "border-border bg-background/40 hover:bg-background/70"
                             }`}
                     >
-                        <div className="text-sm font-semibold text-primary">{conversation.username}</div>
-                        <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
-                            {conversation.last_message ?? "Belum ada pesan"}
+                        <div className="bg-primary w-10 h-10 rounded-full flex justify-center items-center text-white">
+                            <p>{conversation.username.split('')[0].toUpperCase()}</p>
+                        </div>
+                        <div>
+                            <div className="text-sm font-semibold text-primary">{conversation.username}</div>
+                            <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+                                {conversation.last_message ?? "Belum ada pesan"}
+                            </div>
                         </div>
                     </button>
                 );
